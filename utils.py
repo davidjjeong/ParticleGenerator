@@ -8,10 +8,14 @@ class SpacePoint:
         self.z = z
 
 class EventData:
-    def __init__(self, event_num, layer_num):
+    def __init__(self, event_num):
         self.event_num = event_num
-        self.layer_num = layer_num
         self.spacePoints = np.array([])
 
     def appendPoint(self, SpacePoint:SpacePoint):
-        self.spacePoints.append(SpacePoint)
+        self.spacePoints = np.append(self.spacePoints, SpacePoint)
+    
+    def printFivePts(self):
+        for i in range(0, 5):
+            print(f"{self.spacePoints[i].layer_num}, {self.spacePoints[i].radius}, \
+            {self.spacePoints[i].phi}, {self.spacePoints[i].z}")

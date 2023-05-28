@@ -11,11 +11,14 @@ def readFile(filepath):
             idx = 0
             event = EventData(idx)
             tuples = ast.literal_eval(line)
+            num_layer = 0
 
             for tuple in tuples:
-                newSpacePoint = SpacePoint(tuple[0], tuple[1], tuple[2], tuple[3])
-                event.appendPoint(newSpacePoint)
+                newSpacePoint = SpacePoint(tuple[1], tuple[2], tuple[3])
+                event.appendPoint(tuple[0], newSpacePoint)
+                num_layer = max(num_layer, tuple[0])
             
+            event.retrieveNumLayer(num_layer)
             events.append(event)
             # event.printFivePts()
             idx += 1

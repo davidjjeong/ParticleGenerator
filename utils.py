@@ -1,8 +1,7 @@
 import numpy as np
 
 class SpacePoint:
-    def __init__(self, layer_num, radius, phi, z):
-        self.layer_num = layer_num
+    def __init__(self, radius, phi, z):
         self.radius = radius
         self.phi = phi
         self.z = z
@@ -10,10 +9,18 @@ class SpacePoint:
 class EventData:
     def __init__(self, event_num):
         self.event_num = event_num
-        self.spacePoints = []
+        self.spacePoints = dict()
 
-    def appendPoint(self, SpacePoint:SpacePoint):
-        self.spacePoints.append(SpacePoint)
+    def appendPoint(self, layer_num, SpacePoint:SpacePoint):
+        if layer_num not in self.spacePoints:
+            self.spacePoints[layer_num] = SpacePoint
+        elif type(self.spacePoints[layer_num]) == list:
+            self.spacePoints[layer_num].append(SpacePoint)
+        else:
+            self.spacePoints[layer_num] = [self.spacePoints[layer_num], SpacePoint]
+    
+    def retrieveNumLayer(self, num_layers):
+        self.num_layers = num_layers
     
     def printFivePts(self):
         for i in range(0, 5):

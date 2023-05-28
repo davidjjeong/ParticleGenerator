@@ -20,11 +20,7 @@ def readFile(filepath):
             
             event.retrieveNumLayer(num_layer)
             events.append(event)
-            event.printNumPts()
-            # event.printFivePts()
             idx += 1
-    print(f"Time Taken:{time.time() - start}")
+    # print(f"Time Taken:{time.time() - start}")
 
     return events
-
-events = readFile("eventHits.txt")

@@ -1,4 +1,4 @@
-import numpy as np
+import matplotlib.pyplot as plt
 
 class SpacePoint:
     def __init__(self, radius, phi, z):

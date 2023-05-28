@@ -10,10 +10,10 @@ class SpacePoint:
 class EventData:
     def __init__(self, event_num):
         self.event_num = event_num
-        self.spacePoints = np.array([])
+        self.spacePoints = []
 
     def appendPoint(self, SpacePoint:SpacePoint):
-        self.spacePoints = np.append(self.spacePoints, SpacePoint)
+        self.spacePoints.append(SpacePoint)
     
     def printFivePts(self):
         for i in range(0, 5):

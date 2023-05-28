@@ -23,4 +23,4 @@ def readFile(filepath):
 
     return events
 
-# events = readFile("eventHits.txt")
+events = readFile("eventHits.txt")

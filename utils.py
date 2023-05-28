@@ -22,7 +22,11 @@ class EventData:
     def retrieveNumLayer(self, num_layers):
         self.num_layers = num_layers
     
-    def printFivePts(self):
-        for i in range(0, 5):
-            print(f"{self.spacePoints[i].layer_num}, {self.spacePoints[i].radius}, \
-            {self.spacePoints[i].phi}, {self.spacePoints[i].z}")
+    def printNumPts(self):
+        prt_string = ""
+        for i in range(1, self.num_layers + 1):
+            if i != self.num_layers:
+                prt_string = prt_string + str(len(self.spacePoints[i])) + ", "
+            else:
+                prt_string += str(len(self.spacePoints[i]))
+        print(f"{prt_string} \n")

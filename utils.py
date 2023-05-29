@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 class SpacePoint:
     def __init__(self, radius, phi, z):
@@ -30,3 +31,15 @@ class EventData:
             else:
                 prt_string += str(len(self.spacePoints[i]))
         print(f"{prt_string} \n")
+
+    def plotCylindrical(self):
+        for i in range(1, self.num_layers + 1):
+            z_arr = [x.z for x in self.spacePoints[i]]
+            r_arr = self.spacePoints[i][0].radius * np.ones(len(z_arr)) 
+            plt.scatter(z_arr, r_arr, s = 2, c = "b")
+        
+        plt.yticks(np.arange(0, self.spacePoints[self.num_layers][0].radius + 1, self.num_layers))
+        plt.title(f'Distribution of All SpacePoints in Event {self.event_num}')
+        plt.ylabel('Radius')
+        plt.xlabel('z-coordinate')
+        plt.show()

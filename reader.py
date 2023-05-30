@@ -21,6 +21,6 @@ def readFile(filepath):
             event.retrieveNumLayer(num_layer)
             events.append(event)
             idx += 1
-    print(f"Time Taken:{time.time() - start}")
+    # print(f"Time Taken:{time.time() - start}")
 
     return events

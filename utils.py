@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 class SpacePoint:
     def __init__(self, radius, phi, z):
@@ -42,4 +43,16 @@ class EventData:
         plt.title(f'Distribution of All SpacePoints in Event {self.event_num}')
         plt.ylabel('Radius')
         plt.xlabel('z-coordinate')
+        plt.show()
+    
+    def plotCartesian(self):
+        for i in range(1, self.num_layers + 1):
+            x_arr = [(x.radius * math.cos(x.phi)) for x in self.spacePoints[i]]
+            y_arr = [(x.radius * math.sin(x.phi)) for x in self.spacePoints[i]]
+            plt.scatter(x_arr, y_arr, s = 2, c = "b")
+        
+        # plt.yticks(np.arange(0, self.spacePoints[self.num_layers][0].radius + 1, self.num_layers))
+        plt.title(f'Distribution of All SpacePoints in Event {self.event_num}')
+        plt.ylabel('y')
+        plt.xlabel('x')
         plt.show()

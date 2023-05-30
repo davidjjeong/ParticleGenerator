@@ -90,7 +90,7 @@ class EventData:
                 x = point.radius * math.cos(point.phi)
                 y = point.radius * math.sin(point.phi)
 
-                angle_wrt_org = math.degrees(math.atan2(y, x)) % 360
+                angle_wrt_org = math.degrees(point.phi) % 360
                 sector_num = int(angle_wrt_org / (360 / nPhiSlices))
 
                 ax.plot(x, y, marker = 'o', markersize = 2, color = colorList[sector_num % 128])

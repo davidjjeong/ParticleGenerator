@@ -7,3 +7,4 @@ for event in events:
 
 events[0].plotCylindrical()
 events[0].plotCartesian()
+events[0].nSlicePoints(8)

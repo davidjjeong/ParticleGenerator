@@ -46,12 +46,13 @@ class EventData:
         plt.show()
     
     def plotCartesian(self):
+        fig, ax = plt.subplots()
+        ax.set_box_aspect(1)
         for i in range(1, self.num_layers + 1):
             x_arr = [(x.radius * math.cos(x.phi)) for x in self.spacePoints[i]]
             y_arr = [(x.radius * math.sin(x.phi)) for x in self.spacePoints[i]]
-            plt.scatter(x_arr, y_arr, s = 2, c = "b")
-        
-        # plt.yticks(np.arange(0, self.spacePoints[self.num_layers][0].radius + 1, self.num_layers))
+            ax.scatter(x_arr, y_arr, s = 2, c = "b")
+
         plt.title(f'Distribution of All SpacePoints in Event {self.event_num}')
         plt.ylabel('y')
         plt.xlabel('x')

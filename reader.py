@@ -1,6 +1,7 @@
+from eventdata import *
+
 import ast
 import time
-from utils import *
 
 def readFile(filepath):
     events = []

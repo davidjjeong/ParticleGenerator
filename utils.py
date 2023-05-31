@@ -22,10 +22,19 @@ colorList = [
 ]
 
 class SpacePoint:
-    def __init__(self, radius, phi, z):
+    def __init__(self, layer_num, radius, phi, z):
+        self.layer_num = layer_num
         self.radius = radius
         self.phi = phi
         self.z = z
+
+def appendToDict(d:dict, key, value:SpacePoint):
+    if key not in d:
+        d[key] = value
+    elif type(d[key]) == list:
+        d[key].append(value)
+    else:
+        d[key] = [d[key], value]
 
 class EventData:
     def __init__(self, event_num):
@@ -33,12 +42,7 @@ class EventData:
         self.spacePoints = dict()
 
     def appendPoint(self, layer_num, SpacePoint:SpacePoint):
-        if layer_num not in self.spacePoints:
-            self.spacePoints[layer_num] = SpacePoint
-        elif type(self.spacePoints[layer_num]) == list:
-            self.spacePoints[layer_num].append(SpacePoint)
-        else:
-            self.spacePoints[layer_num] = [self.spacePoints[layer_num], SpacePoint]
+        appendToDict(self.spacePoints, layer_num, SpacePoint)
     
     def retrieveNumLayer(self, num_layers):
         self.num_layers = num_layers
@@ -51,6 +55,25 @@ class EventData:
             else:
                 prt_string += str(len(self.spacePoints[i]))
         print(f"{prt_string} \n")
+
+    def produceWedgeData(self, nPhiSlices):
+        wedges = dict()
+        for ptsPerLayer in self.spacePoints.values():
+            ptsPerLayer = np.array(ptsPerLayer)
+            for pt in ptsPerLayer:
+                angle_wrt_org = math.degrees(pt.phi) % 360
+                sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
+                appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
+        
+        filename = f'{nPhiSlices}_wedges_event{self.event_num}.txt'
+        with open(filename, 'w') as f:
+            for i in range(1, nPhiSlices + 1):
+                line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
+                f.write(line_to_write + '\n')
+
+    """
+    Methods below are designed for visualization.
+    """
 
     def plotCylindrical(self):
         for i in range(1, self.num_layers + 1):

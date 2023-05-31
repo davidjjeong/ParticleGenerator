@@ -14,7 +14,7 @@ def readFile(filepath):
             num_layer = 0
 
             for tuple in tuples:
-                newSpacePoint = SpacePoint(tuple[1], tuple[2], tuple[3])
+                newSpacePoint = SpacePoint(tuple[0], tuple[1], tuple[2], tuple[3])
                 event.appendPoint(tuple[0], newSpacePoint)
                 num_layer = max(num_layer, tuple[0])
             

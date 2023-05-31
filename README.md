@@ -5,7 +5,7 @@ This project forms the basis of the particle cover algorithm we intend to develo
 `SpacePoint` has 4 instance variables:
 
 - `layer_num`: which layer the `SpacePoint` is in
-- `radius`: Distance from the `SpacePoint` to $ r = 0 $
+- `radius`: Distance from the `SpacePoint` to $r = 0$
 - `phi`: Radial distance of the `SpacePoint`
 - `z`: $z$-coordinate of the `SpacePoint`
 

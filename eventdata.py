@@ -22,6 +22,25 @@ class EventData:
     def retrieveNumLayer(self, num_layers):
         self.num_layers = num_layers
     
+    def produceWedgeData(self, nPhiSlices):
+        wedges = dict()
+        for ptsPerLayer in self.spacePoints.values():
+            ptsPerLayer = np.array(ptsPerLayer)
+            for pt in ptsPerLayer:
+                angle_wrt_org = math.degrees(pt.phi) % 360
+                sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
+                appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
+        
+        filename = f'{nPhiSlices}_wedges_event{self.event_num}.txt'
+        with open(filename, 'w') as f:
+            for i in range(1, nPhiSlices + 1):
+                line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
+                f.write(line_to_write + '\n')
+    
+    """
+    Methods designed to print or return number of SpacePoints per layer in an event.
+    """
+
     def printNumPts(self):
         prt_string = ""
         for i in range(1, self.num_layers + 1):
@@ -37,21 +56,6 @@ class EventData:
             ptsPerLayer[i - 1] = len(self.spacePoints[i])
         
         return ptsPerLayer
-
-    def produceWedgeData(self, nPhiSlices):
-        wedges = dict()
-        for ptsPerLayer in self.spacePoints.values():
-            ptsPerLayer = np.array(ptsPerLayer)
-            for pt in ptsPerLayer:
-                angle_wrt_org = math.degrees(pt.phi) % 360
-                sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
-                appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
-        
-        filename = f'{nPhiSlices}_wedges_event{self.event_num}.txt'
-        with open(filename, 'w') as f:
-            for i in range(1, nPhiSlices + 1):
-                line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
-                f.write(line_to_write + '\n')
 
     """
     Methods below are designed for visualization.

@@ -5,7 +5,7 @@ This file has been simply created for the purpose of testing whether produceWedg
 from reader import *
 
 nPhiSlices = 128
-wedges = readFile('128_wedges_event0.txt')
+wedges = readFile('output/128_wedges_event_0.txt')
 num_layers = wedges[0].num_layers
 
 numPtsPerLayer = np.zeros(num_layers)

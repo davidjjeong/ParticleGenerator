@@ -8,8 +8,8 @@ def readFile(filepath):
 
     start = time.time()
     with open(filepath) as f:
+        idx = 0
         for line in f:
-            idx = 0
             event = EventData(idx)
             tuples = ast.literal_eval(line)
             num_layer = 0

@@ -31,7 +31,7 @@ class EventData:
                 sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
                 appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
         
-        filename = f'{nPhiSlices}_wedges_event{self.event_num}.txt'
+        filename = f'output/{nPhiSlices}_wedges_event_{self.event_num}.txt'
         with open(filename, 'w') as f:
             for i in range(1, nPhiSlices + 1):
                 line_to_write = str(wedges[i]).replace('[', '').replace(']', '')

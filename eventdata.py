@@ -30,6 +30,13 @@ class EventData:
             else:
                 prt_string += str(len(self.spacePoints[i]))
         print(f"{prt_string} \n")
+    
+    def returnPtsPerLayer(self):
+        ptsPerLayer = np.zeros(self.num_layers)
+        for i in range(1, self.num_layers + 1):
+            ptsPerLayer[i - 1] = len(self.spacePoints[i])
+        
+        return ptsPerLayer
 
     def produceWedgeData(self, nPhiSlices):
         wedges = dict()

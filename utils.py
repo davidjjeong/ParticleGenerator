@@ -1,3 +1,5 @@
+import math
+
 colorList = [
     "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
     "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
@@ -24,3 +26,26 @@ def appendToDict(d:dict, key, value):
         d[key].append(value)
     else:
         d[key] = [d[key], value]
+
+def findCenter(x1, y1, x2, y2, r):
+    slopeOfCenter = - (x2 - x1) / (y2 - y1)
+    midPoint = ((x1 + x2) / 2, (y1 + y2) / 2)
+    dist = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+    bisectorLength = math.sqrt(math.pow(r, 2) - math.pow(dist / 2, 2))
+
+    if(math.isinf(slopeOfCenter)):
+        return((midPoint[0], midPoint[1] + bisectorLength), (midPoint[0], midPoint[1] - bisectorLength))
+    elif(slopeOfCenter == 0):
+        return((midPoint[0] + bisectorLength, midPoint[1]), (midPoint[0] - bisectorLength, midPoint[1]))
+    else:
+        b = - (2 * x1)
+        c = math.pow(x1, 2) - (math.pow(r, 2) / (math.pow(slopeOfCenter, 2) + 1))
+        d = (b**2) - (4*c)
+
+        C_x1 = (-b - math.sqrt(d)) / 2
+        C_x2 = (-b + math.sqrt(d)) / 2
+
+        C_y1 = slopeOfCenter * (x1 - C_x1)
+        C_y2 = slopeOfCenter * (x1 - C_x2)
+
+        return((C_x1, C_y1), (C_x2, C_y2))

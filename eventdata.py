@@ -21,6 +21,10 @@ class EventData:
     
     def retrieveNumLayer(self, num_layers):
         self.num_layers = num_layers
+
+    """
+    Produces `nPhiSlices` wedge data with straight line boundaries.
+    """
     
     def produceWedgeData(self, nPhiSlices):
         wedges = dict()
@@ -36,6 +40,10 @@ class EventData:
             for i in range(1, nPhiSlices + 1):
                 line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
                 f.write(line_to_write + '\n')
+    
+    def produceCurvedWedgeData(self, nPhiSlices, p, B):
+        wedges = dict() # to store wedge data later
+        wedgeBoundPts = np.ndarray(shape = (5, nPhiSlices), dtype = float)
     
     """
     Methods designed to print or return number of SpacePoints per layer in an event.

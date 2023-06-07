@@ -27,25 +27,48 @@ def appendToDict(d:dict, key, value):
     else:
         d[key] = [d[key], value]
 
-def findCenter(x1, y1, x2, y2, r):
-    slopeOfCenter = - (x2 - x1) / (y2 - y1)
-    midPoint = ((x1 + x2) / 2, (y1 + y2) / 2)
-    dist = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
-    bisectorLength = math.sqrt(math.pow(r, 2) - math.pow(dist / 2, 2))
+def testCenter(C_x, C_y, x1, y1, x2, y2, r):
+    testFirstPt = (((x1 - C_x) ** 2 + (y1 - C_y) ** 2) == (r ** 2))
+    testSecondPt = (((x2 - C_x) ** 2 + (y2 - C_y) ** 2) == (r ** 2))
 
-    if(math.isinf(slopeOfCenter)):
-        return((midPoint[0], midPoint[1] + bisectorLength), (midPoint[0], midPoint[1] - bisectorLength))
-    elif(slopeOfCenter == 0):
-        return((midPoint[0] + bisectorLength, midPoint[1]), (midPoint[0] - bisectorLength, midPoint[1]))
+    if testFirstPt and testSecondPt:
+        print(f'Passed test for center: ({C_x}, {C_y})')
     else:
-        b = - (2 * x1)
-        c = math.pow(x1, 2) - (math.pow(r, 2) / (math.pow(slopeOfCenter, 2) + 1))
-        d = (b**2) - (4*c)
+        print(f'Failed test for center: ({C_x}, {C_y})')
 
-        C_x1 = (-b - math.sqrt(d)) / 2
-        C_x2 = (-b + math.sqrt(d)) / 2
+def findCenter(x1, y1, x2, y2, r):
+    midPoint = ((x1 + x2) / 2, (y1 + y2) / 2)
+    dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    bisectorLength = math.sqrt(r ** 2 - (dist ** 2) / 4)
 
-        C_y1 = slopeOfCenter * (x1 - C_x1)
-        C_y2 = slopeOfCenter * (x1 - C_x2)
+    if(y1 == y2):
+        C_x = midPoint[0]
 
-        return((C_x1, C_y1), (C_x2, C_y2))
+        C_y1 = midPoint[1] + bisectorLength
+        C_y2 = midPoint[1] - bisectorLength
+
+        testCenter(C_x, C_y1, x1, y1, x2, y2, r)
+        testCenter(C_x, C_y2, x1, y1, x2, y2, r)
+
+        return ((C_x, C_y1), (C_x, C_y2))
+    elif(x1 == x2):
+        C_x1 = midPoint[0] + bisectorLength
+        C_x2 = midPoint[0] - bisectorLength
+
+        C_y = midPoint[1]
+
+        testCenter(C_x1, C_y, x1, y1, x2, y2, r)
+        testCenter(C_x2, C_y, x1, y1, x2, y2, r)
+
+        return ((C_x1, C_y), (C_x2, C_y))
+    else:
+        C_x1 = midPoint[0] + (bisectorLength / dist) * (y1 - y2)
+        C_x2 = midPoint[0] - (bisectorLength / dist) * (y1 - y2)
+
+        C_y1 = midPoint[1] + (bisectorLength / dist) * (x2 - x1)
+        C_y2 = midPoint[1] + (bisectorLength / dist) * (x2 - x1)
+
+        testCenter(C_x1, C_y1, x1, y1, x2, y2, r)
+        testCenter(C_x2, C_y2, x1, y1, x2, y2, r)
+
+        return ((C_x1, C_y1), (C_x2, C_y2))

@@ -50,7 +50,7 @@ def findCenter(x1, y1, x2, y2, r):
         testCenter(C_x, C_y1, x1, y1, x2, y2, r)
         testCenter(C_x, C_y2, x1, y1, x2, y2, r)
 
-        return ((C_x, C_y1), (C_x, C_y2))
+        return (C_x, C_y1), (C_x, C_y2)
     elif(x1 == x2):
         C_x1 = midPoint[0] + bisectorLength
         C_x2 = midPoint[0] - bisectorLength
@@ -60,7 +60,7 @@ def findCenter(x1, y1, x2, y2, r):
         testCenter(C_x1, C_y, x1, y1, x2, y2, r)
         testCenter(C_x2, C_y, x1, y1, x2, y2, r)
 
-        return ((C_x1, C_y), (C_x2, C_y))
+        return (C_x1, C_y), (C_x2, C_y)
     else:
         C_x1 = midPoint[0] + (bisectorLength / dist) * (y1 - y2)
         C_x2 = midPoint[0] - (bisectorLength / dist) * (y1 - y2)
@@ -71,4 +71,4 @@ def findCenter(x1, y1, x2, y2, r):
         testCenter(C_x1, C_y1, x1, y1, x2, y2, r)
         testCenter(C_x2, C_y2, x1, y1, x2, y2, r)
 
-        return ((C_x1, C_y1), (C_x2, C_y2))
+        return (C_x1, C_y1), (C_x2, C_y2)

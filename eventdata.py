@@ -43,8 +43,81 @@ class EventData:
     
     def produceCurvedWedgeData(self, nPhiSlices, p, B):
         wedges = dict() # to store wedge data later
-        wedgeBoundPts = np.ndarray(shape = (5, nPhiSlices), dtype = float)
-    
+        wedgeBound = np.ndarray(shape = (self.num_layers, nPhiSlices, 2))
+        wedgeCenters = np.ndarray(shape = (nPhiSlices, 4))
+        wedgeRadius = (100 * p) / (0.3 * B) # in our case, wedgeRadius = 1667 cm
+
+        firstPt = (0, 0)
+        r = self.spacePoints[1][0].radius
+        for i in range(0, self.num_layers):
+            for j in range(0, nPhiSlices):
+                if i == 0:
+                    angle_wrt_org = 0 + j * (2 * math.pi) / nPhiSlices
+                    secondPt = (r * math.cos(angle_wrt_org), r * math.sin(angle_wrt_org))
+                    [C_x1, C_y1], [C_x2, C_y2] = findCenter(firstPt[0], firstPt[1], secondPt[0], secondPt[1], wedgeRadius)
+                    
+                    C1_angle_wrt_org = math.atan2(C_y1, C_x1)
+                    C1_angle_wrt_org = convertNegRadian(C1_angle_wrt_org)
+
+                    C2_angle_wrt_org = math.atan2(C_y2, C_x2)
+                    C2_angle_wrt_org = convertNegRadian(C2_angle_wrt_org)
+
+                    C1_C2_angle_diff = C1_angle_wrt_org - C2_angle_wrt_org
+                    C1_C2_angle_diff = convertNegRadian(C1_C2_angle_diff)
+
+                    C2_C1_angle_diff = C2_angle_wrt_org - C1_angle_wrt_org
+                    C2_C1_angle_diff = convertNegRadian(C2_C1_angle_diff)
+
+                    if C1_C2_angle_diff < C2_C1_angle_diff:
+                        wedgeCenters[j][0] = C_x2
+                        wedgeCenters[j][1] = C_y2
+                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x1
+                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y1
+                    else:
+                        wedgeCenters[j][0] = C_x1
+                        wedgeCenters[j][1] = C_y1
+                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x2
+                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y2
+                    
+                    wedgeBound[i][j][0] = angle_wrt_org
+                    wedgeBound[i][j][1] = angle_wrt_org + (2 * math.pi) / nPhiSlices
+                else:
+                    curRWedgeCenter = (wedgeCenters[j][0], wedgeCenters[j][1])
+                    curLWedgeCenter = (wedgeCenters[j][2], wedgeCenters[j][3])
+                    firstLayerRBound = wedgeBound[0][j][0]
+                    firstLayerLBound = wedgeBound[0][j][1]
+                    r1 = self.spacePoints[i+1][0].radius
+
+                    # print(f'RBound: {firstLayerRBound}, LBound: {firstLayerLBound}')
+
+                    (i_x1, i_y1), (i_x2, i_y2) = getIntersection(firstPt[0], firstPt[1], r1, 
+                                                                curRWedgeCenter[0], curRWedgeCenter[1], wedgeRadius)
+                    wedgeBound[i][j][0] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerRBound)
+
+                    print(f'Layer {i+1}, RWedge: {wedgeBound[i][j][0]}')
+
+                    (i_x1, i_y1), (i_x2, i_y2) = getIntersection(firstPt[0], firstPt[1], r1,
+                                                                curLWedgeCenter[0], curLWedgeCenter[1], wedgeRadius)
+                    wedgeBound[i][j][1] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerLBound)
+
+                    print(f'Layer {i+1}, LWedge: {wedgeBound[i][j][1]}')
+
+        fig, ax = plt.subplots()
+        ax.set_box_aspect(1)
+        for j in range(0, nPhiSlices):
+            x_arr = []
+            y_arr = []
+            for i in range(0, self.num_layers):
+                x_arr.append(5 * (i + 1) * math.cos(wedgeBound[i][j][0]))
+                x_arr.append(5 * (i + 1) * math.cos(wedgeBound[i][j][1]))
+                y_arr.append(5 * (i + 1) * math.sin(wedgeBound[i][j][0]))
+                y_arr.append(5 * (i + 1) * math.sin(wedgeBound[i][j][1]))
+            ax.scatter(x_arr, y_arr, s = 4, c = colorList[j])
+        plt.title('Bound Points of Each Wedge per Layer (8 Wedges)')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.show()
+
     """
     Methods designed to print or return number of SpacePoints per layer in an event.
     """

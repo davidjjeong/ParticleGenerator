@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 colorList = [
     "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
@@ -28,47 +29,86 @@ def appendToDict(d:dict, key, value):
         d[key] = [d[key], value]
 
 def testCenter(C_x, C_y, x1, y1, x2, y2, r):
-    testFirstPt = (((x1 - C_x) ** 2 + (y1 - C_y) ** 2) == (r ** 2))
-    testSecondPt = (((x2 - C_x) ** 2 + (y2 - C_y) ** 2) == (r ** 2))
+    testFirstPt = math.isclose((x1 - C_x) ** 2 + (y1 - C_y) ** 2, r ** 2)
+    testSecondPt = math.isclose((x2 - C_x) ** 2 + (y2 - C_y) ** 2, r ** 2)
 
     if testFirstPt and testSecondPt:
-        print(f'Passed test for center: ({C_x}, {C_y})')
+        print(f'Passed Test for Center: ({C_x}, {C_y})')
     else:
-        print(f'Failed test for center: ({C_x}, {C_y})')
+        print(f'Failed Test for Center: ({C_x}, {C_y})')
 
 def findCenter(x1, y1, x2, y2, r):
-    midPoint = ((x1 + x2) / 2, (y1 + y2) / 2)
-    dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    bisectorLength = math.sqrt(r ** 2 - (dist ** 2) / 4)
+    p1 = np.array([x1, y1])
+    p2 = np.array([x2, y2])
 
-    if(y1 == y2):
-        C_x = midPoint[0]
+    # Calculate midpoint between two points
+    midPoint = (p1 + p2) / 2
 
-        C_y1 = midPoint[1] + bisectorLength
-        C_y2 = midPoint[1] - bisectorLength
+    # Calculate normalized direction vector perpendicular to line segment
+    v = np.array([p2[1] - p1[1], p1[0] - p2[0]])
+    v = v / np.linalg.norm(v)
 
-        testCenter(C_x, C_y1, x1, y1, x2, y2, r)
-        testCenter(C_x, C_y2, x1, y1, x2, y2, r)
+    # Calculate distance between midpoint and center
+    dist = np.sqrt(r ** 2 - (np.linalg.norm(p1 - p2) / 2) ** 2)
 
-        return (C_x, C_y1), (C_x, C_y2)
-    elif(x1 == x2):
-        C_x1 = midPoint[0] + bisectorLength
-        C_x2 = midPoint[0] - bisectorLength
+    # Calculate centers of circles
+    C1 = midPoint + dist * v
+    C2 = midPoint - dist * v
 
-        C_y = midPoint[1]
+    # Test the centers
+    testCenter(C1[0], C1[1], x1, y1, x2, y2, r)
+    testCenter(C2[0], C2[1], x1, y1, x2, y2, r)
 
-        testCenter(C_x1, C_y, x1, y1, x2, y2, r)
-        testCenter(C_x2, C_y, x1, y1, x2, y2, r)
+    return C1, C2
 
-        return (C_x1, C_y), (C_x2, C_y)
+def getIntersection(x1, y1, r1, x2, y2, r2):
+    d = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    a = (r1 ** 2 - r2 ** 2 + d ** 2) / (2 * d)
+    h = math.sqrt(r1 ** 2 - a ** 2)
+
+    x3 = x1 + a * (x2 - x1) / d
+    y3 = y1 + a * (y2 - y1) / d
+
+    i_x1 = x3 + h * (y2 - y1) / d
+    i_y1 = y3 - h * (x2 - x1) / d
+
+    i_x2 = x3 - h * (y2 - y1) / d
+    i_y2 = y3 + h * (x2 - x1) / d
+
+    return (i_x1, i_y1), (i_x2, i_y2)
+
+def determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerBound):
+    i1_angle_wrt_org = math.atan2(i_y1, i_x1)
+    i1_angle_wrt_org = convertNegRadian(i1_angle_wrt_org)
+
+    i2_angle_wrt_org = math.atan2(i_y2, i_x2)
+    i2_angle_wrt_org = convertNegRadian(i2_angle_wrt_org)
+
+    if i1_angle_wrt_org > math.pi:
+        if firstLayerBound == 0:
+            firstLayerBound = 2 * math.pi
     else:
-        C_x1 = midPoint[0] + (bisectorLength / dist) * (y1 - y2)
-        C_x2 = midPoint[0] - (bisectorLength / dist) * (y1 - y2)
+        if firstLayerBound == 2 * math.pi:
+            firstLayerBound = 0
+    
+    i1_wedge_angle = min(abs(i1_angle_wrt_org - firstLayerBound), abs(firstLayerBound - i1_angle_wrt_org))
 
-        C_y1 = midPoint[1] + (bisectorLength / dist) * (x2 - x1)
-        C_y2 = midPoint[1] + (bisectorLength / dist) * (x2 - x1)
+    if i2_angle_wrt_org > math.pi:
+        if firstLayerBound == 0:
+            firstLayerBound = 2 * math.pi
+    else:
+        if firstLayerBound == 2 * math.pi:
+            firstLayerBound = 0
+    
+    i2_wedge_angle = min(abs(i2_angle_wrt_org - firstLayerBound), abs(firstLayerBound - i2_angle_wrt_org))
 
-        testCenter(C_x1, C_y1, x1, y1, x2, y2, r)
-        testCenter(C_x2, C_y2, x1, y1, x2, y2, r)
+    # print(f'I1 Wedge Angle: {i1_wedge_angle}, I2 Wedge Angle: {i2_wedge_angle}')
 
-        return (C_x1, C_y1), (C_x2, C_y2)
+    if i1_wedge_angle < i2_wedge_angle:
+        return i1_angle_wrt_org
+    else:
+        return i2_angle_wrt_org
+
+# Converts negative radians to positive
+def convertNegRadian(angle):
+    return angle if angle >= 0 else 2 * math.pi - abs(angle)

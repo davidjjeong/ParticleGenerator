@@ -78,9 +78,10 @@ class EventData:
                     self.wedgeBound[i][j][1] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerLBound)
         
     def calculateWedgeOverlap(self, nPhiSlices):
-        myTable = PrettyTable(["Start Wedge", "End Wedge", "Layer", "Overlap %"])
+        myTable = PrettyTable(["Layer", "Overlap %"])
 
         for i in range(0, self.num_layers):
+            overlap = 0.000000000
             for j in range(0, nPhiSlices):
                 curEndAngle = self.wedgeBound[i][j][1]
                 nextStartAngle = self.wedgeBound[i][j+1][0] if j < nPhiSlices - 1 else self.wedgeBound[i][0][0]
@@ -92,12 +93,13 @@ class EventData:
 
                 nextWedge = j + 1 if j < nPhiSlices - 1 else 0
 
-                if math.isclose(curEndAngle, nextStartAngle):
-                    myTable.add_row([str(j), str(nextWedge), str(i + 1), "0.000000000"])
-                else:
-                    overlap_percentage = (curEndAngle - nextStartAngle) * 100 / (2 * math.pi)
-                    rounded_percentage = round(Decimal(str(overlap_percentage)), 9)
-                    myTable.add_row([str(j), str(nextWedge), str(i + 1), str(rounded_percentage)])
+                if not math.isclose(curEndAngle, nextStartAngle):
+                    overlap += (curEndAngle - nextStartAngle)
+                
+            overlap_percentage = overlap * 100 / (2 * math.pi)
+            rounded_percentage = round(Decimal(str(overlap_percentage)), 9)
+            myTable.add_row([str(i+1), str(rounded_percentage)])
+
         print(myTable)
 
     """
@@ -125,12 +127,15 @@ class EventData:
 
     def printNumPts(self):
         prt_string = ""
+        total_pts = 0
         for i in range(1, self.num_layers + 1):
             if i != self.num_layers:
                 prt_string = prt_string + str(len(self.spacePoints[i])) + ", "
             else:
                 prt_string += str(len(self.spacePoints[i]))
-        print(f"{prt_string} \n")
+
+            total_pts += len(self.spacePoints[i])
+        print(f"Pts per Layer: {prt_string}, Total: {total_pts} \n")
     
     def returnPtsPerLayer(self):
         ptsPerLayer = np.zeros(self.num_layers)

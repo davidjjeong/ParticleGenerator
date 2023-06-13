@@ -1,4 +1,6 @@
 from utils import *
+from prettytable import PrettyTable
+from decimal import Decimal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,29 +24,9 @@ class EventData:
     def retrieveNumLayer(self, num_layers):
         self.num_layers = num_layers
 
-    """
-    Produces `nPhiSlices` wedge data with straight line boundaries.
-    """
-    
-    def produceWedgeData(self, nPhiSlices):
-        wedges = dict()
-        for ptsPerLayer in self.spacePoints.values():
-            ptsPerLayer = np.array(ptsPerLayer)
-            for pt in ptsPerLayer:
-                angle_wrt_org = math.degrees(pt.phi) % 360
-                sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
-                appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
-        
-        filename = f'output/{nPhiSlices}_wedges_event_{self.event_num}.txt'
-        with open(filename, 'w') as f:
-            for i in range(1, nPhiSlices + 1):
-                line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
-                f.write(line_to_write + '\n')
-    
-    def produceCurvedWedgeData(self, nPhiSlices, p, B):
-        wedges = dict() # to store wedge data later
-        wedgeBound = np.ndarray(shape = (self.num_layers, nPhiSlices, 2))
-        wedgeCenters = np.ndarray(shape = (nPhiSlices, 4))
+    def locateWedgeBound(self, nPhiSlices, p, B):
+        self.wedgeBound = np.ndarray(shape = (self.num_layers, nPhiSlices, 2))
+        self.wedgeCenters = np.ndarray(shape = (nPhiSlices, 4))
         wedgeRadius = (100 * p) / (0.3 * B) # in our case, wedgeRadius = 1667 cm
 
         firstPt = (0, 0)
@@ -69,54 +51,73 @@ class EventData:
                     C2_C1_angle_diff = convertNegRadian(C2_C1_angle_diff)
 
                     if C1_C2_angle_diff < C2_C1_angle_diff:
-                        wedgeCenters[j][0] = C_x2
-                        wedgeCenters[j][1] = C_y2
-                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x1
-                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y1
+                        self.wedgeCenters[j][0] = C_x2
+                        self.wedgeCenters[j][1] = C_y2
+                        self.wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x1
+                        self.wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y1
                     else:
-                        wedgeCenters[j][0] = C_x1
-                        wedgeCenters[j][1] = C_y1
-                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x2
-                        wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y2
+                        self.wedgeCenters[j][0] = C_x1
+                        self.wedgeCenters[j][1] = C_y1
+                        self.wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][2] = C_x2
+                        self.wedgeCenters[j-1 if j > 0 else nPhiSlices - 1][3] = C_y2
                     
-                    wedgeBound[i][j][0] = angle_wrt_org
-                    wedgeBound[i][j][1] = angle_wrt_org + (2 * math.pi) / nPhiSlices
+                    self.wedgeBound[i][j][0] = angle_wrt_org
+                    self.wedgeBound[i][j][1] = angle_wrt_org + (2 * math.pi) / nPhiSlices
                 else:
-                    curRWedgeCenter = (wedgeCenters[j][0], wedgeCenters[j][1])
-                    curLWedgeCenter = (wedgeCenters[j][2], wedgeCenters[j][3])
-                    firstLayerRBound = wedgeBound[0][j][0]
-                    firstLayerLBound = wedgeBound[0][j][1]
+                    curRWedgeCenter = (self.wedgeCenters[j][0], self.wedgeCenters[j][1])
+                    curLWedgeCenter = (self.wedgeCenters[j][2], self.wedgeCenters[j][3])
+                    firstLayerRBound = self.wedgeBound[0][j][0]
+                    firstLayerLBound = self.wedgeBound[0][j][1]
                     r1 = self.spacePoints[i+1][0].radius
-
-                    # print(f'RBound: {firstLayerRBound}, LBound: {firstLayerLBound}')
 
                     (i_x1, i_y1), (i_x2, i_y2) = getIntersection(firstPt[0], firstPt[1], r1, 
                                                                 curRWedgeCenter[0], curRWedgeCenter[1], wedgeRadius)
-                    wedgeBound[i][j][0] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerRBound)
-
-                    print(f'Layer {i+1}, RWedge: {wedgeBound[i][j][0]}')
-
+                    self.wedgeBound[i][j][0] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerRBound)
                     (i_x1, i_y1), (i_x2, i_y2) = getIntersection(firstPt[0], firstPt[1], r1,
                                                                 curLWedgeCenter[0], curLWedgeCenter[1], wedgeRadius)
-                    wedgeBound[i][j][1] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerLBound)
+                    self.wedgeBound[i][j][1] = determineWhichIntersection(i_x1, i_y1, i_x2, i_y2, firstLayerLBound)
+        
+    def calculateWedgeOverlap(self, nPhiSlices):
+        myTable = PrettyTable(["Start Wedge", "End Wedge", "Layer", "Overlap %"])
 
-                    print(f'Layer {i+1}, LWedge: {wedgeBound[i][j][1]}')
+        for i in range(0, self.num_layers):
+            for j in range(0, nPhiSlices):
+                curEndAngle = self.wedgeBound[i][j][1]
+                nextStartAngle = self.wedgeBound[i][j+1][0] if j < nPhiSlices - 1 else self.wedgeBound[i][0][0]
 
-        fig, ax = plt.subplots()
-        ax.set_box_aspect(1)
-        for j in range(0, nPhiSlices):
-            x_arr = []
-            y_arr = []
-            for i in range(0, self.num_layers):
-                x_arr.append(5 * (i + 1) * math.cos(wedgeBound[i][j][0]))
-                x_arr.append(5 * (i + 1) * math.cos(wedgeBound[i][j][1]))
-                y_arr.append(5 * (i + 1) * math.sin(wedgeBound[i][j][0]))
-                y_arr.append(5 * (i + 1) * math.sin(wedgeBound[i][j][1]))
-            ax.scatter(x_arr, y_arr, s = 4, c = colorList[j])
-        plt.title('Bound Points of Each Wedge per Layer (8 Wedges)')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.show()
+                if nextStartAngle == 0:
+                    nextStartAngle = 2 * math.pi
+                else:
+                    nextStartAngle = nextStartAngle if j < nPhiSlices - 1 else nextStartAngle - 2 * math.pi
+
+                nextWedge = j + 1 if j < nPhiSlices - 1 else 0
+
+                if math.isclose(curEndAngle, nextStartAngle):
+                    myTable.add_row([str(j), str(nextWedge), str(i + 1), "0.000000000"])
+                else:
+                    overlap_percentage = (curEndAngle - nextStartAngle) * 100 / (2 * math.pi)
+                    rounded_percentage = round(Decimal(str(overlap_percentage)), 9)
+                    myTable.add_row([str(j), str(nextWedge), str(i + 1), str(rounded_percentage)])
+        print(myTable)
+
+    """
+    Produces `nPhiSlices` wedge data with straight line boundaries.
+    """
+    
+    def produceWedgeData(self, nPhiSlices):
+        wedges = dict()
+        for ptsPerLayer in self.spacePoints.values():
+            ptsPerLayer = np.array(ptsPerLayer)
+            for pt in ptsPerLayer:
+                angle_wrt_org = math.degrees(pt.phi) % 360
+                sector_num = int(angle_wrt_org / (360 / nPhiSlices)) + 1
+                appendToDict(wedges, sector_num, (pt.layer_num, pt.radius, pt.phi, pt.z))
+        
+        filename = f'output/{nPhiSlices}_wedges_event_{self.event_num}.txt'
+        with open(filename, 'w') as f:
+            for i in range(1, nPhiSlices + 1):
+                line_to_write = str(wedges[i]).replace('[', '').replace(']', '')
+                f.write(line_to_write + '\n')
 
     """
     Methods designed to print or return number of SpacePoints per layer in an event.

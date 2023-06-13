@@ -6,7 +6,8 @@ for event in events:
     event.produceWedgeData(128)
 """
 
-events[0].produceCurvedWedgeData(8, 10, 2)
+events[0].locateWedgeBound(8, 10, 2)
+events[0].calculateWedgeOverlap(8)
 
 # events[0].plotCylindrical()
 # events[0].plotCartesian()

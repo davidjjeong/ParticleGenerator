@@ -10,7 +10,7 @@ def readFile(filepath):
     with open(filepath) as f:
         idx = 0
         for line in f:
-            if not line.strip():
+            if line.strip():
                 event = EventData(idx)
                 tuples = ast.literal_eval(line)
                 num_layer = 0

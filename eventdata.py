@@ -101,6 +101,16 @@ class EventData:
             myTable.add_row([str(i+1), str(rounded_percentage)])
 
         print(myTable)
+    
+    def produceWedgeData_(self, nPhiSlices):
+        wedges = dict()
+        for i in range(0, self.num_layers):
+            ptsPerLayer = np.array(self.spacePoints[i + 1])
+            for pt in ptsPerLayer:
+                angle_wrt_org = convertNegRadian(pt.phi)
+                respectiveWedges = np.where(angle_wrt_org < self.wedgeBound[:][:][1] | 
+                                            angle_wrt_org >= self.wedgeBound[:][:][0])
+                print(respectiveWedges)
 
     """
     Produces `nPhiSlices` wedge data with straight line boundaries.
@@ -135,7 +145,9 @@ class EventData:
                 prt_string += str(len(self.spacePoints[i]))
 
             total_pts += len(self.spacePoints[i])
-        print(f"Pts per Layer: {prt_string}, Total: {total_pts} \n")
+        # print(f"Pts per Layer: {prt_string}, Total: {total_pts} \n")
+
+        return total_pts
     
     def returnPtsPerLayer(self):
         ptsPerLayer = np.zeros(self.num_layers)
@@ -143,6 +155,15 @@ class EventData:
             ptsPerLayer[i - 1] = len(self.spacePoints[i])
         
         return ptsPerLayer
+    
+    def returnUniquePoints(self):
+        uniquePoints = set()
+        for i in range(1, self.num_layers + 1):
+            pts_in_layer = self.spacePoints[i]
+            for j in range(0, len(pts_in_layer)):
+                pt = pts_in_layer[j]
+                uniquePoints.add((pt.layer_num, pt.radius, pt.phi, pt.z))
+        return uniquePoints
 
     """
     Methods below are designed for visualization.

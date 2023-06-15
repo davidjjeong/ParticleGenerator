@@ -1,8 +1,24 @@
 """
-This file has been simply created for the purpose of testing whether produceWedgeData() works correctly.
+Tests whether the universal reader function works correctly.
 """
-
 from reader import *
+
+wedge_data = readFile("input/Wedge_Data.txt")
+
+event_pts = 0
+i = 0
+total_unique_pts = set()
+for wedge in wedge_data:
+    unique_pts = wedge.returnUniquePoints()
+    total_unique_pts = total_unique_pts.union(unique_pts)
+    i += 1
+    if i % 128 == 0:
+        print(f'Total # of SpacePoints in Event {int(i / 128)}: {len(total_unique_pts)}')
+        total_unique_pts = set()
+
+"""
+Tests whether produceWedgeData() works correctly.
+"""
 
 nPhiSlices = 128
 wedges = readFile('output/128_wedges_event_0.txt')

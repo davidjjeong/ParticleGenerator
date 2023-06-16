@@ -1,6 +1,10 @@
 from reader import *
+from converter import convertToDataset
 
-events = readFile("input/eventHits.txt")
+events = readFile("input/Wedge_Data.txt")
+
+firstWedge = convertToDataset(events[0])
+firstWedge.plot(show_lines=True)
 
 """
 firstEvent = events[0]

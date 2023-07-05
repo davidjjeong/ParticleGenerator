@@ -4,7 +4,7 @@ from converter import convertToDataset
 events = readFile("input/Wedge_Data.txt")
 
 firstWedge = convertToDataset(events[0])
-firstWedge.plot(show_lines = True)
+firstWedge.plot(show_lines = False)
 
 """
 for event in events:

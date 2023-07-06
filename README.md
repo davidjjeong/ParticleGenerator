@@ -1,6 +1,6 @@
 # Particle Generator
 
-This project forms the basis of the particle cover algorithm we intend to develop during Summer 2023 research with Dr. Ashutosh Kotwal, Fritz London Professor of Physics at Duke University. Given a text file (in our case, 'eventHits.txt') of tuples separated by comma, containing information about the points in 3-D (`layer_num`, `radius`, `phi`, `z`), we have developed a reader function to read in the data and store each data point into an instance of class `SpacePoint`.
+This project forms the basis, or, mainly, the data generation of the particle cover algorithm we intend to develop during Summer 2023 research with Dr. Ashutosh Kotwal, Fritz London Professor of Physics at Duke University. Given a text file (in our case, 'eventHits.txt') of tuples separated by comma, containing information about the points in 3-D (`layer_num`, `radius`, `phi`, `z`), we have developed a reader function to read in the data and store each data point into an instance of class `SpacePoint`.
 
 `SpacePoint` has 4 instance variables:
 
